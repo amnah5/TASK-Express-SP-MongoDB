@@ -2,6 +2,15 @@ const products = require("../../products");
 const Product = require("../../db/models/Product");
 const { findByIdAndUpdate } = require("../../db/models/Product");
 
+exports.fetchProduct = async (productId, next) => {
+  try {
+    const product = await Product.findById(productId);
+    return product;
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.productListFetch = async (req, res, next) => {
   try {
     const products = await Product.find();
@@ -21,32 +30,22 @@ exports.productCreate = async (req, res, next) => {
 };
 
 exports.productUpdate = async (req, res, next) => {
-  const { productId } = req.params;
   try {
     const product = await Product.findByIdAndUpdate(
       { _id: productId },
       req.body,
-      { new: true, runValidators: true } // returns the updated product
+      { new: true, runValidators: true }
     );
-    if (product) {
-      return res.status(200).json(product);
-    } else {
-      return res.status(404).json({ message: "Product Not Found" });
-    }
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
 };
 
 exports.productDelete = async (req, res, next) => {
-  const { productId } = req.params;
   try {
-    const product = await Product.findByIdAndDelete({ _id: productId });
-    if (product) {
-      return res.status(204).end();
-    } else {
-      return res.status(404).json({ message: "Product not found!" });
-    }
+    await req.product.remove();
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
